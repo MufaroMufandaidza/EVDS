@@ -393,6 +393,6 @@ if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
     manager = Manager()
-    database = Database('DESKTOP-L70GSTK', 'EVDS')
+    database = Database('SERVER_NAME', 'DB_NAME')
     mydb =  database.cursor
     sys.exit(app.exec_())
