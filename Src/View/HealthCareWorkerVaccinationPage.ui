@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>392</width>
+    <width>425</width>
     <height>300</height>
    </rect>
   </property>
@@ -16,7 +16,7 @@
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>30</x>
      <y>10</y>
      <width>341</width>
      <height>131</height>
@@ -80,7 +80,7 @@
      </rect>
     </property>
     <property name="placeholderText">
-     <string>Doe</string>
+     <string>1</string>
     </property>
    </widget>
    <widget class="QDateTimeEdit" name="dt_vaxdatevax">
@@ -136,7 +136,7 @@
   <widget class="QGroupBox" name="groupBox_2">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>30</x>
      <y>150</y>
      <width>341</width>
      <height>71</height>
@@ -186,6 +186,44 @@
    </property>
    <property name="text">
     <string>S u b m i t</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lb_vaxSubErr">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>270</y>
+     <width>421</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Something went wrong please contact the system administrator</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lb_hcwvaxmissingnfo">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>220</y>
+     <width>361</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>All the Fields are compulsory, please fill in all of them.</string>
    </property>
   </widget>
  </widget>

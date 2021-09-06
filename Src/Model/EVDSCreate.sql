@@ -215,3 +215,59 @@ BEGIN
     END CATCH
 
 END
+
+CREATE PROCEDURE dbo.usp_UpdateAppointment
+
+    @voucher int,  
+	@appointmentDate datetime,
+    @responseMessage NVARCHAR(250) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON
+
+    BEGIN TRY
+		Update
+        [dbo].[Appointments]
+           set [appointmentDate] = @appointmentDate
+     where
+           [patientId] = (select [patientId] from vouchers where voucher = @voucher)
+
+       SET @responseMessage='Success'
+
+    END TRY
+    BEGIN CATCH
+        SET @responseMessage=ERROR_MESSAGE() 
+    END CATCH
+
+END
+
+CREATE PROCEDURE dbo.usp_UpdateVaccinations
+
+    @voucher int,  
+	@vaxDate datetime,
+	@username NVARCHAR(50),
+	@facility NVARCHAR(100),
+    @responseMessage NVARCHAR(250) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON
+
+    BEGIN TRY
+		INSERT INTO
+        [dbo].[Vaccinations]
+           ([vaccinationDate], [facility], [userId], [patientId], [appointmentId], [voucherId] )
+		   VALUES( CAST(@vaxDate as datetime), @facility, (select [id] from Users where username = @username),
+			      (select [patientId] from vouchers where voucher = @voucher),
+			      (select id from Appointments where [patientId] = (select [patientId] from vouchers where voucher = @voucher)),
+			    (select id from Vouchers where voucher = @voucher) )
+
+       SET @responseMessage='Success'
+
+    END TRY
+    BEGIN CATCH
+        SET @responseMessage=ERROR_MESSAGE() 
+    END CATCH
+
+END
+
+

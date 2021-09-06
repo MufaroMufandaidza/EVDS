@@ -119,6 +119,9 @@ class Manager:
 
         self.patientRegistrationPageView.btn_ptntRegSubmit.clicked.connect(self.onClickPtntReg)
 
+        self.patientAppointmentUpdatePageView.btn_ptntUpdateVerify.clicked.connect(self.onClickPtntUpdateVerify)
+        self.patientAppointmentUpdatePageView.btn_ptntUpdateSubmit.clicked.connect(self.onClickPtntUpdateSubmit)
+
 
         self.landingPageView.show()
 
@@ -230,6 +233,8 @@ class Manager:
                     errFlag = True
                     self.healthCareWorkerLoginPageView.hide()
                     self.healthCareWorkerVaccinationPageView.show()
+                    self.healthCareWorkerVaccinationPageView.lb_vaxSubErr.hide()
+                    self.healthCareWorkerVaccinationPageView.lb_hcwvaxmissingnfo.hide()
                     break
                 if(str(row[0]) == 'Incorrect_Password'):
                     mydb.commit()
@@ -246,8 +251,51 @@ class Manager:
     
     #Open the register vaccination page
     def onClickHcwVax(self):
-        self.healthCareWorkerLoginPageView.hide()
-        self.healthCareWorkerVaccinationPageView.show()
+        name = len(str(self.healthCareWorkerVaccinationPageView.et_ptntNamevax.text()))
+        facility = len(str(self.healthCareWorkerVaccinationPageView.et_facilityvax.text()))
+        voucher = len(str(self.healthCareWorkerVaccinationPageView.et_ptntvouchvax.text()))
+        user = len(str(self.healthCareWorkerVaccinationPageView.et_hcwUnVax.text()))
+
+        name_ = str(self.healthCareWorkerVaccinationPageView.et_ptntNamevax.text())
+        facility_ = str(self.healthCareWorkerVaccinationPageView.et_facilityvax.text())
+        voucher_ = str(self.healthCareWorkerVaccinationPageView.et_ptntvouchvax.text())
+        vaxDate_ = self.healthCareWorkerVaccinationPageView.dt_vaxdatevax.dateTime()
+        vaxDate_ = vaxDate_.toString(self.healthCareWorkerVaccinationPageView.dt_vaxdatevax.displayFormat()).replace("/","")
+        vaxDate = len(vaxDate_)
+        user_ = str(self.healthCareWorkerVaccinationPageView.et_hcwUnVax.text())
+
+        if(name == 0 or facility == 0 or voucher == 0 or user == 0):
+            self.healthCareWorkerVaccinationPageView.lb_hcwvaxmissingnfo.show()
+        else:
+            errFlag = False
+            query = ('declare @rm varchar(50) '
+                    'EXEC dbo.usp_UpdateVaccinations '
+                    +'\''+voucher_+'\','
+                    +'\''+vaxDate_+'\','
+                    +'\''+user_+'\','
+                    +'\''+facility_+'\','
+                    '@rm  OUTPUT; '
+                    'select @rm; '
+                    )
+            print(query)
+            mydb.execute(query)
+            for row in mydb:
+                if (str(row[0]) == 'Success'):
+                    mydb.commit()
+                    self.healthCareWorkerVaccinationPageView.hide()
+                    self.healthCareWorkerVaccinationPageView.show()
+                    errFlag = True
+                    break
+            if(errFlag == False):
+                self.healthCareWorkerVaccinationPageView.lb_vaxSubErr.show()
+            
+
+        
+
+
+
+
+
 
     """
     Patient Flow.
@@ -264,6 +312,7 @@ class Manager:
             self.landingPageView.hide()
             self.patientAppointmentUpdatePageView.show()
             self.patientAppointmentUpdatePageView.lb_voucherWarn.hide() 
+            self.patientAppointmentUpdatePageView.lb_appUpdtErr.hide()
             self.patientAppointmentUpdatePageView.gb_appUpdate.hide() 
 
     #Enroll for Vaccination.       
@@ -287,11 +336,11 @@ class Manager:
         ptntIdNum_ = str(self.patientRegistrationPageView.et_ptntId.text())
         ptntCell_ = str(self.patientRegistrationPageView.et_ptntCell.text()).replace(" ","")
         ptntEmail_ = str(self.patientRegistrationPageView.et_ptntEmail.text())
-        addLn1_ = str(self.patientRegistrationPageView.et_addLn1.text())
-        addLn2_ = str(self.patientRegistrationPageView.et_addLn2.text())
+        addLn1_ = str(self.patientRegistrationPageView.et_addLn1.text()).replace(" ","")
+        addLn2_ = str(self.patientRegistrationPageView.et_addLn2.text()).replace(" ","")
         city_ = str(self.patientRegistrationPageView.et_city.text())
         postalCode_ = str(self.patientRegistrationPageView.et_postal.text())
-        facility_ = str(self.patientRegistrationPageView.et_facility.text())
+        facility_ = str(self.patientRegistrationPageView.et_facility.text()).replace(" ","")
         gender_ = str(self.patientRegistrationPageView.cmb_gender.currentText())
         dob_ = str(self.patientRegistrationPageView.dt_DOB.date().toPyDate()).replace("-","")
         vaxDate_ = self.patientRegistrationPageView.dt_vaxdate.dateTime()
@@ -308,21 +357,21 @@ class Manager:
             errFlag = False
             query = ('declare @rm varchar(50) '
                     'EXEC dbo.usp_AddPatient '
-                    +ptntName_+','
-                    +ptntSurname_+','
+                    +'\''+ptntName_+'\','
+                    +'\''+ptntSurname_+'\','
                     +gender_+','
                     +'\''+dob_+'\','
-                    +ptntIdNum_+','
-                    +ptntCell_+','
-                    +ptntEmail_+','
-                    +addLn1_+','
-                    +addLn2_+','
-                    +city_+','
+                    +'\''+ptntIdNum_+'\','
+                    +'\''+ptntCell_+'\','
+                    +'\''+ptntEmail_+'\','
+                    +'\''+addLn1_+'\','
+                    +'\''+addLn2_+'\','
+                    +'\''+city_+'\','
                     +postalCode_+','
                     '@rm  OUTPUT; '
                     'select @rm; '
                     )
-            #print(query)
+            print(query)
             mydb.execute(query)
             for row in mydb:
                 if (str(row[0]) == 'Success'):
@@ -333,15 +382,15 @@ class Manager:
                 errFlag = False
                 query = ('declare @rm varchar(50) '
                     'EXEC dbo.usp_AddAppointment '
-                    +ptntName_+','
-                    +ptntIdNum_+','
-                    +facility_+','
+                    +'\''+ptntName_+'\','
+                    +'\''+ptntIdNum_+'\','
+                    +'\''+facility_+'\','
                     +'\''+vaxDate_+'\','
                     'Vaccination,'                    
                     '@rm  OUTPUT; '
                     'select @rm; '
                     )
-            #print(query)
+            print(query)
             mydb.execute(query)
             for row in mydb:
                 if (str(row[0]) == 'Success'):
@@ -353,13 +402,13 @@ class Manager:
                 vaccines = ['Johnson and Johnson', 'pfizer']
                 query = ('declare @rm varchar(50) '
                     'EXEC dbo.usp_AddVoucher '
-                    +ptntName_+','
-                    +ptntIdNum_+','
+                    +'\''+ptntName_+'\','
+                    +'\''+ptntIdNum_+'\','
                     +np.random.choice(vaccines)+','                    
                     '@rm  OUTPUT; '
                     'select @rm; '
                     )
-            #print(query)
+            print(query)
             mydb.execute(query)
             for row in mydb:
                 if (str(row[0]) == 'Success'):
@@ -387,12 +436,61 @@ class Manager:
                 mydb.commit()
                 errFlag = True
                 break
+    
+    #Verify voucher number for patient update
+    def onClickPtntUpdateVerify(self):
+        voucher_ = str(self.patientAppointmentUpdatePageView.et_voucher.text())
+        errFlag = False
+        query = ('Select voucher From vouchers '
+                    'where voucher = \''+voucher_+'\''
+                    )
+        print(query)
+        mydb.execute(query) 
+        for row in mydb:
+            if(str(row[0] == voucher_)):
+                self.patientAppointmentUpdatePageView.gb_appUpdate.show()
+                self.patientAppointmentUpdatePageView.lb_voucherWarn.hide()
+                self.patientAppointmentUpdatePageView.lb_appUpdtErr.hide()
+                mydb.commit()
+                errFlag = True
+                break
+            else:
+                self.patientAppointmentUpdatePageView.lb_voucherWarn.show()
+        if(errFlag == False):
+            self.patientAppointmentUpdatePageView.lb_appUpdtErr.show()
+
+    #Submit appointment update.
+    def onClickPtntUpdateSubmit(self):
+        voucher_ = str(self.patientAppointmentUpdatePageView.et_voucher.text())
+        vaxDate_ = self.patientAppointmentUpdatePageView.dt_vaxDateAppUpdate.dateTime()
+        vaxDate_ = vaxDate_.toString(self.patientAppointmentUpdatePageView.dt_vaxDateAppUpdate.displayFormat()).replace("/","")
+        errFlag = False
+        query = ('declare @rm varchar(50) '
+                    'EXEC dbo.usp_UpdateAppointment '
+                    +'\''+voucher_+'\','
+                    +'\''+vaxDate_+'\','
+                    '@rm  OUTPUT; '
+                    'select @rm; '
+                    )
+        print(query)
+        mydb.execute(query)
+        for row in mydb:
+            if (str(row[0]) == 'Success'):
+                self.patientAppointmentUpdatePageView.hide()
+                self.landingPageView.show()
+                mydb.commit()
+                errFlag = True
+                break
+        if(errFlag == False):
+            self.patientAppointmentUpdatePageView.lb_appUpdtErr.show()
+            
+                
 
 
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
     manager = Manager()
-    database = Database('SERVER_NAME', 'DB_NAME')
+    database = Database('DESKTOP-L70GSTK', 'EVDS')
     mydb =  database.cursor
     sys.exit(app.exec_())
